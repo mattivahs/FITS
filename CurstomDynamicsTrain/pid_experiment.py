@@ -122,11 +122,6 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False):
         # print(i, '-th step.')
         # print(action, '\n', obs, '\n', reward, '\n', done, '\n', info, '\n')
 
-    # elapsed_sec = trajs_data['timestamp'][0][-1] - trajs_data['timestamp'][0][0]
-    # print(f'\n{iterations} iterations (@{config.task_config.ctrl_freq}Hz) in {elapsed_sec:.2f} seconds, i.e. {iterations / elapsed_sec:.2f} steps/sec for a {(iterations * (1. / config.task_config.ctrl_freq)) / elapsed_sec:.2f}x speedup.\n')
-    #
-    # print('FINAL METRICS - ' + ', '.join([f'{key}: {value}' for key, value in metrics.items()]))
-
 
 if __name__ == '__main__':
     run()
