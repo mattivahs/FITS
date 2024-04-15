@@ -11,9 +11,13 @@ import pybullet as p
 from safe_control_gym.experiments.base_experiment import BaseExperiment
 from safe_control_gym.utils.configuration import ConfigFactory
 from safe_control_gym.utils.registration import make
+from safe_control_gym.controllers.pid_rl.pid_rl import obs2state, state2obs
+
+import torch
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 
-def run(gui=False, n_episodes=1, n_steps=None, save_data=False):
+def run(gui=False, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
     '''The main function running PID experiments.
 
     Args:
@@ -45,36 +49,10 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False):
     # Create controller.
     ctrl = make(config.algo,
                 env_func,
-                )
+                **config.algo_config,
+                output_dir=curr_path + '/temp')
 
-    if custom_trajectory:
-        # Set iterations and episode counter.
-        ITERATIONS = int(config.task_config['episode_len_sec'] * config.task_config['ctrl_freq']) + 2  # +2 for start and end of reference
-
-        # Curve fitting with waypoints.
-        waypoints = np.array([(0, 0, 0), (0.2, 0.5, 0.5), (0.5, 0.1, 0.6), (1, 1, 1), (1.3, 1, 1.2)])
-        deg = 6
-        t = np.arange(waypoints.shape[0])
-        fit_x = np.polyfit(t, waypoints[:, 0], deg)
-        fit_y = np.polyfit(t, waypoints[:, 1], deg)
-        fit_z = np.polyfit(t, waypoints[:, 2], deg)
-        fx = np.poly1d(fit_x)
-        fy = np.poly1d(fit_y)
-        fz = np.poly1d(fit_z)
-        t_scaled = np.linspace(t[0], t[-1], ITERATIONS)
-        ref_x = fx(t_scaled)
-        ref_y = fy(t_scaled)
-        ref_z = fz(t_scaled)
-
-        X_GOAL = np.zeros((ITERATIONS, ctrl.env.symbolic.nx))
-        X_GOAL[:, 0] = ref_x
-        X_GOAL[:, 2] = ref_y
-        X_GOAL[:, 4] = ref_z
-
-        ctrl.env.X_GOAL = X_GOAL
-        ctrl.reference = X_GOAL
-
-    obs, _ = ctrl.env.reset()
+    obs, _ = ctrl.env.reset(seed=42)
 
     if config.task_config.task == 'traj_tracking' and gui is True:
         if config.task_config.quad_type == 2:
@@ -88,22 +66,31 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False):
                                lineColorRGB=[1, 0, 0],
                                physicsClientId=ctrl.env.PYB_CLIENT)
 
-        if custom_trajectory:
-            for point in waypoints:
-                p.loadURDF(os.path.join(ctrl.env.URDF_DIR, 'gate.urdf'),
-                           [point[0], point[1], point[2] - 0.05],
-                           p.getQuaternionFromEuler([0, 0, 0]),
-                           physicsClientId=ctrl.env.PYB_CLIENT)
+    ctrl.load(curr_path + "/LearnedModels/")
+    ctrl.learn(ctrl.env)
+    # ctrl.save(curr_path + "/LearnedModels/")
 
     # Run the experiment.
     experiment = BaseExperiment(ctrl.env, ctrl)
-    ctrl.env.render()
-    trajs_data, metrics = experiment.run_evaluation(n_episodes=n_episodes, n_steps=n_steps)
+    # ctrl.env.render()
+    trajs_data, metrics = experiment.run_evaluation(n_episodes=n_episodes, n_steps=n_steps, seeds=[42])
+
+    predicted_states = []
+    obs, info = ctrl.env.reset(seed=42)
+    next_state = obs2state(obs)
+    predicted_states.append(next_state.detach().cpu().numpy().flatten())
+
+    for i in range(10):
+        a = torch.tensor(trajs_data['action'][0][i, :], dtype=torch.float32, device=device)
+        next_state = ctrl.dynModel.forward(next_state, a)
+        predicted_states.append(next_state.detach().cpu().numpy().flatten())
     experiment.close()
+
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(trajs_data['state'][0][:, 0], trajs_data['state'][0][:, 2])
+    ax.plot([p_[0]for p_ in predicted_states], [p_[1]for p_ in predicted_states])
     plt.show()
 
     if save_data:
