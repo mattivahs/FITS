@@ -81,12 +81,6 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False):
             ref_3D = np.hstack([ctrl.env.X_GOAL[:, [0]], np.zeros(ctrl.env.X_GOAL[:, [0]].shape), ctrl.env.X_GOAL[:, [2]]])
         else:
             ref_3D = ctrl.env.X_GOAL[:, [0, 2, 4]]
-        # Plot in 3D.
-        # ax = plt.axes(projection='3d')
-        # ax.plot3D(ref_3D[:, 0], ref_3D[:, 1], ref_3D[:, 2])
-        # if custom_trajectory:
-        #     ax.scatter3D(waypoints[:, 0], waypoints[:, 1], waypoints[:, 2])
-        # plt.show()
 
         for i in range(10, ctrl.env.X_GOAL.shape[0], 10):
             p.addUserDebugLine(lineFromXYZ=[ref_3D[i - 10, 0], ref_3D[i - 10, 1], ref_3D[i - 10, 2]],
