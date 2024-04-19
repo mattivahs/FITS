@@ -18,7 +18,7 @@ import torch
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 
-def run(gui=False, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
+def run(gui=True, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
     '''The main function running PID experiments.
 
     Args:
@@ -43,7 +43,7 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
     # Create controller.
     ctrl = make(config.algo,
                 env_func,
-                **config.algo_config,
+                **config.task_config,
                 output_dir=curr_path + '/temp')
 
     obs, _ = ctrl.env.reset(seed=42)
@@ -71,20 +71,21 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
 
     predicted_states = []
     obs, info = ctrl.env.reset(seed=48)
-    next_state = obs2state(obs)
-    predicted_states.append(next_state.detach().cpu().numpy().flatten())
+    next_state = obs
+    predicted_states.append(next_state)
 
-    for i in range(100):
-        a = torch.tensor(trajs_data['action'][0][i, :], dtype=torch.float32, device=device)
-        next_state = ctrl.dynModel.forward(next_state, a)
-        predicted_states.append(next_state.detach().cpu().numpy().flatten())
+    # for i in range(len(trajs_data['action'][0])):
+    #     a = torch.tensor(trajs_data['action'][0][i, :], dtype=torch.float32, device=device)
+    #     next_state += 0.02 * np.array(ctrl.prior_dyn(next_state, a.detach().cpu().numpy())).flatten()
+    #     # next_state = torch.from_numpy(np.float32(ctrl.prior_dyn_batch(next_state.cpu().numpy().T, a.cpu().numpy().T))).to(device).T
+    #     predicted_states.append(next_state.flatten())
     experiment.close()
 
 
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
     # ax.plot(trajs_data['state'][0][:, 0], trajs_data['state'][0][:, 2])
-    # ax.plot([p_[0]for p_ in predicted_states], [p_[1]for p_ in predicted_states])
+    # ax.plot([p_[0]for p_ in predicted_states], [p_[2]for p_ in predicted_states])
     # plt.show()
 
     if save_data:
@@ -94,8 +95,18 @@ def run(gui=False, n_episodes=1, n_steps=None, save_data=False, curr_path='.'):
         with open(f'./temp-data/{config.algo}_data_{config.task_config.task}.pkl', 'wb') as file:
             pickle.dump(results, file)
 
-    post_analysis(trajs_data['obs'][0], trajs_data['action'][0], ctrl.env)
+    plot_tracking(trajs_data['obs'][0], trajs_data['action'][0], ctrl.env, ctrl)
 
+
+def plot_tracking(state_stack, input_stack, env, ctrl):
+    model = env.symbolic
+    stepsize = model.dt
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(np.array(state_stack).transpose()[0, :], np.array(state_stack).transpose()[2, :], color='b')
+    ref = ctrl.reference.cpu().numpy()
+    ax.plot(ref[:, 0], ref[:, 1], color='r')
+    plt.show()
 def post_analysis(state_stack, input_stack, env):
     '''Plots the input and states to determine iLQR's success.
 
