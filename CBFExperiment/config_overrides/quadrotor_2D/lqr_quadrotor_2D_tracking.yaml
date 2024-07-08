@@ -1,0 +1,17 @@
+algo: lqr
+algo_config:
+  # Cost parameters
+  q_lqr: [1, 1, 1, 0.1, 0.1, 0.1]
+  r_lqr: [1]
+
+  # Model arguments
+  # Note: Higher simulation frequency is required if using controller designed
+  #       based on the continuous-time model
+  discrete_dynamics: True
+
+
+sf_config:
+  slope: 0.1
+  soft_constrained: True
+  slack_weight: 10000.0
+  slack_tolerance: 1.0E-3
