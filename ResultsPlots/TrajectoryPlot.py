@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import matplotlib.patches as patches
 
-with open('Data/CBF.pkl', 'rb') as file:
+with open('Data/CBF3.pkl', 'rb') as file:
     # Load the content
     cbf = pickle.load(file)
 
@@ -15,7 +15,7 @@ with open('Data/MPC.pkl', 'rb') as file:
     # Load the content
     MPC = pickle.load(file)
 
-CBF_states = cbf['trajs_data']['obs'][0]
+CBF_states = cbf['trajs_data']['obs'][0][0:300, :]
 fits_states = fits['trajs_data']['obs'][0][0:380, :]
 MPC_states = MPC['trajs_data']['obs'][0][0:190, :]
 

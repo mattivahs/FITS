@@ -1,8 +1,8 @@
 algo: oacis
 algo_config:
   horizon: 20 #20
-  alpha_1: 20. #20
-  alpha_2: 2. #20
+  alpha_1: 5. #20
+  alpha_2: 5. #20
   trajectory_discretization: 40 #20
   use_min_formulation: True
   Q_diag: [250., 50., 250., 50., 1., 2.] # [250., 50., 220., 50., 1., 2.]

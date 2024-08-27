@@ -2,7 +2,7 @@ task_config:
   seed: 42
   info_in_reset: True
   ctrl_freq: 100
-  pyb_freq: 1000
+  pyb_freq: 10000
   gui: False
   physics: pyb
   quad_type: 2
