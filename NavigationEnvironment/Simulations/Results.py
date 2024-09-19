@@ -52,6 +52,6 @@ ax.set_ylabel(r'$p_y$\textrm{ in [m]}', fontsize=18)
 plt.tight_layout()
 plt.subplots_adjust(bottom=0.19)
 
-plt.savefig('TrajectoriesClutter.pdf')
+# plt.savefig('TrajectoriesClutter.pdf')
 plt.show()
 

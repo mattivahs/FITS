@@ -63,7 +63,7 @@ def max_error(traj):
 
 
 ## RMSE
-print("RMSE OACIS: " + str(np.mean([np.linalg.norm(fits_states[i, [0, 2]] -
+print("RMSE FITS: " + str(np.mean([np.linalg.norm(fits_states[i, [0, 2]] -
        fits_ref[i,[0, 2]]) for i in range(fits_states.shape[0])])) + str(" pm ")
         + str(np.std([np.linalg.norm(fits_states[i, [0, 2]] - fits_ref[i,[0, 2]]) for i in range(fits_states.shape[0])])))
 
@@ -76,7 +76,7 @@ print("RMSE CBF: " + str(np.mean([np.linalg.norm(CBF_states[i, [0, 2]] -
         + str(np.std([np.linalg.norm(CBF_states[i, [0, 2]] - CBF_ref[i,[0, 2]]) for i in range(CBF_states.shape[0])])))
 
 ## CONTROL EFFORT
-print("CONTROL OACIS: " + str(np.mean([np.linalg.norm(fits['trajs_data']['action'][0][i, :]) for i in range(fits_states.shape[0])]))
+print("CONTROL FITS: " + str(np.mean([np.linalg.norm(fits['trajs_data']['action'][0][i, :]) for i in range(fits_states.shape[0])]))
       + str(" pm ") + str(np.std([np.linalg.norm(fits['trajs_data']['action'][0][i, :]) for i in range(fits_states.shape[0])])))
 
 print("CONTROL MPC: " + str(np.mean([np.linalg.norm(MPC['trajs_data']['action'][0][i, :]) for i in range(MPC_states.shape[0])]))
@@ -88,7 +88,7 @@ print("CONTROL CBF: " + str(np.mean([np.linalg.norm(cbf['trajs_data']['action'][
 ## INFEASIBILITY RATE
 
 ## COMPUTATION TIME
-print("Time OACIS: " + str(np.mean(fits['trajs_data']['controller_data'][0]['t_wall'][0][1:]))
+print("Time FITS: " + str(np.mean(fits['trajs_data']['controller_data'][0]['t_wall'][0][1:]))
       + str(" pm ") + str(np.std(fits['trajs_data']['controller_data'][0]['t_wall'][0][1:])))
 
 print("Time MPC: " + str(np.mean(MPC['trajs_data']['controller_data'][0]['t_wall'][0][1:]))
