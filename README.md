@@ -13,7 +13,7 @@ We use two simulation environments, a custom navigation in a cluttered environme
 
 ## Run Experiments
 
-Familiarize with APIs and environments with the scripts in [`examples/`](https://github.com/utiasDSL/safe-control-gym/tree/main/examples)
+Comparison with baseline approaches, namely Control Barrier Functions (CBFs) and Nonlinear Model Predictive Control (NMPC).
 
 ### 2D Quadrotor Geofencing Task
 
